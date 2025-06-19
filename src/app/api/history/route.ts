@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
 
   try {
-    const response = await axios.get('http://localhost:8000/history', {
+    const response = await axios.get('https://mic-introductory-ste-dock.trycloudflare.com/history', {
       headers: {
         ...(authHeader && { Authorization: authHeader }),
       },

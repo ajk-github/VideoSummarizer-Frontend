@@ -31,7 +31,7 @@ export default function ProfilePage() {
           photo: firebaseUser.photoURL,
         });
         const token = await firebaseUser.getIdToken();
-        localStorage.setItem('videoSummarize_token', token);
+        localStorage.setItem('edusummarize_token', token);
       } else {
         setUser(null);
         setShowModal(true);
@@ -92,7 +92,7 @@ export default function ProfilePage() {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const idToken = await result.user.getIdToken();
-    localStorage.setItem('videoSummarize_token', idToken);
+    localStorage.setItem('edusummarize_token', idToken);
     setUser({
       name: result.user.displayName,
       photo: result.user.photoURL,
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                       <img src={thumbnail} alt="Video thumbnail" className="w-40 h-24 object-cover rounded" />
                     )}
                     <div className="flex flex-col">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white break-words max-w-lg">
                         {videoTitles[data.video_url] || 'Loading...'}
                       </h2>
                       <Link

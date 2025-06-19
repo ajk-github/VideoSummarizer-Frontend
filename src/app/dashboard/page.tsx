@@ -25,13 +25,6 @@ export default function DashboardPage() {
   const videoId = extractYouTubeId(videoUrl);
 
   useEffect(() => {
-  const timeout = setTimeout(() => {
-    localStorage.removeItem('video_url');
-    localStorage.removeItem('transcript');
-    localStorage.removeItem('summary');
-  }, 10000);
-
-  const loadFromStorage = () => {
     const storedUrl = localStorage.getItem('video_url') || '';
     const storedTranscript = localStorage.getItem('transcript') || '';
     const storedSummary = localStorage.getItem('summary') || '';
@@ -39,15 +32,16 @@ export default function DashboardPage() {
     setVideoUrl(storedUrl);
     setTranscript(storedTranscript);
     setSummary(storedSummary);
+
+    // Clear after 10 seconds
+    setTimeout(() => {
+      localStorage.removeItem('video_url');
+      localStorage.removeItem('transcript');
+      localStorage.removeItem('summary');
+    }, 10000);
+
     setHasMounted(true);
-  };
-
-  // Short delay to ensure localStorage is fully accessible before state updates
-  setTimeout(loadFromStorage, 10);
-
-  return () => clearTimeout(timeout);
-}, []);
-
+  }, []);
 
   const getSafeDocId = async (videoUrl: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -290,7 +284,7 @@ export default function DashboardPage() {
           try {
             const result = await signInWithPopup(getAuth(), provider);
             const idToken = await result.user.getIdToken();
-            localStorage.setItem('videoSummarize_token', idToken);
+            localStorage.setItem('edusummarize_token', idToken);
             window.location.reload();
           } catch (err: any) {
             console.error('Login failed:', err);

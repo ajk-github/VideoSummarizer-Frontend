@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const response = await axios.get(`http://localhost:8000/history/detail`, {
+    const response = await axios.get(`https://mic-introductory-ste-dock.trycloudflare.com/history/detail`, {
       params: { video_url: videoUrl },
       headers: {
         ...(authHeader && { Authorization: authHeader }),

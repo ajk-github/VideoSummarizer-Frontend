@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
 
   try {
-    const response = await axios.post('http://localhost:8000/process', body, {
+    const response = await axios.post('https://mic-introductory-ste-dock.trycloudflare.com/process', body, {
       headers: {
         'Content-Type': 'application/json',
         ...(authHeader && { Authorization: authHeader }), // Pass token to FastAPI

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const processVideo = async (videoUrl: string) => {
-  const token = localStorage.getItem('videoSummarize_token');
+  const token = localStorage.getItem('edusummarize_token');
 
   const response = await axios.post('/api/process', {
     video_url: videoUrl,
@@ -25,7 +25,7 @@ export const processVideo = async (videoUrl: string) => {
 
 
 export const getUserHistory = async () => {
-  const token = localStorage.getItem('videoSummarize_token');
+  const token = localStorage.getItem('edusummarize_token');
   const response = await fetch('/api/history', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -37,7 +37,7 @@ export const getUserHistory = async () => {
 
 
 export const getSummaryDetail = async (videoUrl: string) => {
-  const token = localStorage.getItem('videoSummarize_token');
+  const token = localStorage.getItem('edusummarize_token');
   const res = await fetch(`/api/history/detail?video_url=${encodeURIComponent(videoUrl)}`, {
     headers: {
       Authorization: `Bearer ${token}`,
