@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
 
   try {
-    const response = await axios.get('https://rss-youth-unions-in.trycloudflare.com/history', {
+    const response = await axios.get('https://get-law-charm-lesson.trycloudflare.com/history', {
       headers: {
         ...(authHeader && { Authorization: authHeader }),
       },
