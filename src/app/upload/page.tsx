@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { processVideo } from '@/lib/api';
@@ -12,7 +12,13 @@ export default function UploadPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showLongProcessMessage, setShowLongProcessMessage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const auth = getAuth();
+    setUser(auth.currentUser);
+  }, []);
 
   const getSafeDocId = async (videoUrl: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -43,25 +49,33 @@ export default function UploadPage() {
         }
       }
 
-      // Start processing without awaiting
       processVideo(videoUrl).catch((err) => {
         console.error('Backend processing error (ignored):', err);
       });
 
-      // UI: show loading for 20s
       await new Promise(resolve => setTimeout(resolve, 20000));
-
-      // UI: show long-processing message for 10s
       setShowLongProcessMessage(true);
       await new Promise(resolve => setTimeout(resolve, 10000));
 
-      // Redirect to profile
       router.push('/profile');
     } catch (err: any) {
       console.error(err);
       setError('Failed to initiate processing.');
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(getAuth(), provider);
+      const idToken = await result.user.getIdToken();
+      localStorage.setItem('edusummarize_token', idToken);
+      router.push('/profile');
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      alert('Login failed. See console.');
     }
   };
 
@@ -90,25 +104,40 @@ export default function UploadPage() {
           Video Transcription &amp; Summary
         </h1>
 
-        <section className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-medium text-gray-800 dark:text-gray-200 mb-4">Paste Video URL</h2>
-          <div className="flex">
-            <input
-              type="text"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-              className="flex-grow px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none rounded-l-md"
-            />
+        {!user ? (
+          <div className="text-center p-6 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+            <p className="mb-4">This feature is only available after logging in.</p>
+            
             <button
-              onClick={startProcessing}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-6 py-3 font-medium rounded-r-md"
-              disabled={isProcessing || showLongProcessMessage}
-            >
-              {isProcessing || showLongProcessMessage ? 'Processing...' : 'Transcribe & Summarize'}
+              onClick={handleLogin}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+              >
+              Login with Google
             </button>
+
+
           </div>
-        </section>
+        ) : (
+          <section className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-medium text-gray-800 dark:text-gray-200 mb-4">Paste Video URL</h2>
+            <div className="flex">
+              <input
+                type="text"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="flex-grow px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none rounded-l-md"
+              />
+              <button
+                onClick={startProcessing}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-6 py-3 font-medium rounded-r-md"
+                disabled={isProcessing || showLongProcessMessage}
+              >
+                {isProcessing || showLongProcessMessage ? 'Processing...' : 'Transcribe & Summarize'}
+              </button>
+            </div>
+          </section>
+        )}
 
         {error && <p className="text-red-500 text-center font-medium mt-4">{error}</p>}
       </div>
