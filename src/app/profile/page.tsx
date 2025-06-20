@@ -12,6 +12,9 @@ import { deleteDoc, doc } from 'firebase/firestore';
 type LectureEntry = {
   video_url: string;
   timestamp: string;
+  summary?: string;
+  transcript?: string;
+  status?: string;
 };
 
 type VideoMetaMap = { [url: string]: string };
@@ -21,6 +24,7 @@ export default function ProfilePage() {
   const [videoTitles, setVideoTitles] = useState<VideoMetaMap>({});
   const [user, setUser] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -49,6 +53,8 @@ export default function ProfilePage() {
           setHistory(data);
         } catch (err) {
           console.error('Failed to fetch lecture history:', err);
+        } finally {
+          setLoading(false);
         }
       };
       fetchHistory();
@@ -175,15 +181,19 @@ export default function ProfilePage() {
         </header>
 
         <div className="space-y-6">
-          {history.length === 0 ? (
+          {loading ? (
+            <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+          ) : history.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400">No lectures saved yet.</p>
           ) : (
-            history.map((entry, idx) => {
+            history.map((entry) => {
               const [docId, rawData] = Object.entries(entry)[0];
               const data = rawData as LectureEntry;
               const displayDate = new Date(data.timestamp).toLocaleString();
               const detailHref = `/profile/details?video_url=${encodeURIComponent(data.video_url)}`;
               const thumbnail = getThumbnail(data.video_url);
+
+              const isComplete = data.transcript && data.summary;
 
               return (
                 <div
@@ -211,18 +221,29 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="self-center flex gap-2">
-                    <Link
-                      href={detailHref}
-                      className="px-4 py-2 rounded-md font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-colors duration-200"
-                    >
-                      View Details
-                    </Link>
-                    <button
-                      onClick={() => deleteVideo(data.video_url)}
-                      className="px-4 py-2 rounded-md font-medium bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
-                    >
-                      <Trash2 className="inline h-4 w-4 mr-1" /> Delete
-                    </button>
+                    {isComplete ? (
+                      <>
+                        <Link
+                          href={detailHref}
+                          className="px-4 py-2 rounded-md font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-colors duration-200"
+                        >
+                          View Details
+                        </Link>
+                        <button
+                          onClick={() => deleteVideo(data.video_url)}
+                          className="px-4 py-2 rounded-md font-medium bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
+                        >
+                          <Trash2 className="inline h-4 w-4 mr-1" /> Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        disabled
+                        className="px-4 py-2 rounded-md font-medium bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed"
+                      >
+                        Processing...
+                      </button>
+                    )}
                   </div>
                 </div>
               );
