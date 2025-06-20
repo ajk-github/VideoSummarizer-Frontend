@@ -43,18 +43,19 @@ export default function UploadPage() {
         }
       }
 
-      // Start processing without waiting for result
+      // Start processing without awaiting
       processVideo(videoUrl).catch((err) => {
         console.error('Backend processing error (ignored):', err);
       });
 
-      // Wait 20 seconds showing "Transcribing..." message
+      // UI: show loading for 20s
       await new Promise(resolve => setTimeout(resolve, 20000));
 
-      // Show long processing message for 10 seconds
+      // UI: show long-processing message for 10s
       setShowLongProcessMessage(true);
       await new Promise(resolve => setTimeout(resolve, 10000));
 
+      // Redirect to profile
       router.push('/profile');
     } catch (err: any) {
       console.error(err);
@@ -108,6 +109,7 @@ export default function UploadPage() {
             </button>
           </div>
         </section>
+
         {error && <p className="text-red-500 text-center font-medium mt-4">{error}</p>}
       </div>
     </main>
