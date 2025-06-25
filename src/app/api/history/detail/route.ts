@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const response = await axios.get(`https://arabia-basketball-instances-told.trycloudflare.com/history/detail`, {
+    const response = await axios.get(`https://weblaunch.us/history/detail`, {
       params: { video_url: videoUrl },
       headers: {
         ...(authHeader && { Authorization: authHeader }),
