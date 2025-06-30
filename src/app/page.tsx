@@ -1,5 +1,6 @@
 'use client';
 import { useEffect } from 'react';
+import Link from 'next/link'
 
 export default function Home() {
   useEffect(() => {
@@ -44,7 +45,8 @@ export default function Home() {
         <div className="mt-10 flex items-center justify-center gap-x-6">
           
           
-          <a
+
+<Link
   href="/upload"
   className="group relative p-4 rounded-2xl backdrop-blur-xl border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-900/40 via-black-900/60 to-black/80 shadow-2xl hover:shadow-indigo-500/30 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 active:scale-95 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
 >
@@ -53,7 +55,7 @@ export default function Home() {
 
   <div className="relative z-10 flex items-center gap-4">
     <div className="p-3 rounded-lg bg-gradient-to-br from-indigo-500/30 to-indigo-600/10 backdrop-blur-sm group-hover:from-indigo-400/40 group-hover:to-indigo-500/20 transition-all duration-300">
-      
+      {/* Optional icon */}
     </div>
     <div className="flex-1 text-left">
       <p className="text-indigo-400 font-bold text-lg group-hover:text-indigo-300 transition-colors duration-300 drop-shadow-sm">
@@ -79,7 +81,8 @@ export default function Home() {
       </svg>
     </div>
   </div>
-</a>
+</Link>
+
 
           
         </div>
