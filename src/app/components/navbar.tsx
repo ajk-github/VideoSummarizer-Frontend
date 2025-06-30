@@ -203,10 +203,10 @@ export default function Navbar() {
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Session Expired
+              You have Logged Out
             </h2>
             <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-              Your login session has expired. Please log in again.
+              Your login session has ended. Please log in again.
             </p>
             <button
               onClick={() => setShowExpiredDialog(false)}

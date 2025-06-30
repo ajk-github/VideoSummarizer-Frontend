@@ -142,27 +142,46 @@ export default function DetailsPage() {
   };
 
   const renderSummaryPoints = () => {
-    const blocks: { time: string; content: string }[] = [];
+  const blocks: { time: string; content: string }[] = [];
 
-    data.summary.split('\n').forEach((line: String) => {
-      const match = line.match(/^\- \*\*\[(\d{2}:\d{2})\]\*\* (.*)/);
-      if (match) {
-        blocks.push({ time: match[1], content: match[2].trim() });
-      }
-    });
+  data.summary.split('\n').forEach((line: string) => {
+    // Format 1: - **[MM:SS]** text
+    let match = line.match(/^\- \*\*\[(\d{2}:\d{2})\]\*\* (.*)/);
+    if (match) {
+      blocks.push({ time: match[1], content: match[2].trim() });
+      return;
+    }
 
-    return blocks.map((block, i) => (
-      <li key={i} className="text-sm text-gray-700 dark:text-gray-300">
-        <button
-          onClick={() => seekToTime(block.time)}
-          className="text-blue-600 dark:text-blue-400 font-medium hover:underline mr-2"
-        >
-          [{block.time}]
-        </button>
-        <span>{highlightText(block.content, summarySearch)}</span>
-      </li>
-    ));
-  };
+    // Format 2: **[MM:SS]** text
+    match = line.match(/^\*\*\[(\d{2}:\d{2})\]\*\* (.*)/);
+    if (match) {
+      blocks.push({ time: match[1], content: match[2].trim() });
+      return;
+    }
+
+    match = line.match(/^[\-\*]?\s*\*\*\[(\d{2}:\d{2})\]\*\*\s*(.*)/);
+    if (match) {
+      blocks.push({ time: match[1], content: match[2].trim() });
+    }
+
+    // Fallback: ignore or accumulate plain text (optional)
+  });
+
+  return blocks.map((block, i) => (
+    <li key={i} className="text-sm text-gray-700 dark:text-gray-300">
+      <button
+        onClick={() => seekToTime(block.time)}
+        className="text-blue-600 dark:text-blue-400 font-medium hover:underline mr-2"
+      >
+        [{block.time}]
+      </button>
+      <span>{highlightText(block.content, summarySearch)}</span>
+    </li>
+  ));
+};
+
+
+
 
   if (loading) return <div className="p-8 text-gray-700 dark:text-gray-300">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
