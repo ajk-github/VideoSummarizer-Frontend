@@ -159,7 +159,7 @@ export default function DetailsPage() {
       return;
     }
 
-    match = line.match(/^[\-\*]?\s*\*\*\[(\d{2}:\d{2})\]\*\*\s*(.*)/);
+    match = line.match(/^\s*[-*]?\s*\*{2}\[?(\d{2}:\d{2})\]?\*{2}\s*(.*)/);
     if (match) {
       blocks.push({ time: match[1], content: match[2].trim() });
     }
