@@ -166,17 +166,17 @@ export default function ProfilePage() {
             <UploadCloud className="mr-3" />
             Upload New Video
           </Link>
-          <Link href="#" className="flex items-center px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+          {/* <Link href="#" className="flex items-center px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             <Settings className="mr-3" />
             Settings
-          </Link>
+          </Link> */}
         </nav>
       </aside>
 
       {/* Main content */}
       <main className="flex-1 overflow-auto p-8 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Saved Lectures</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Saved Videos</h1>
           <p className="text-gray-600 dark:text-gray-400">Browse through your saved lecture notes</p>
         </header>
 
@@ -184,7 +184,7 @@ export default function ProfilePage() {
           {loading ? (
             <p className="text-gray-500 dark:text-gray-400">Loading...</p>
           ) : history.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">No lectures saved yet.</p>
+            <p className="text-gray-500 dark:text-gray-400">No Videos saved yet.</p>
           ) : (
             history.map((entry) => {
               const [docId, rawData] = Object.entries(entry)[0];
