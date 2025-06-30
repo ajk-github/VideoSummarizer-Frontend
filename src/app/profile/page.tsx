@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { UploadCloud, Settings, Trash2 } from 'lucide-react';
+import { UploadCloud, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { getUserHistory } from '@/lib/api';
-import { onAuthStateChanged, getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import { firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -26,6 +31,7 @@ export default function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -45,32 +51,37 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const fetchHistory = async () => {
-        try {
-          const data = await getUserHistory();
-          setHistory(data);
-        } catch (err) {
-          console.error('Failed to fetch lecture history:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchHistory();
+  const fetchHistory = async () => {
+    try {
+      const data = await getUserHistory();
+      setHistory((prevHistory) => {
+        const prevString = JSON.stringify(prevHistory);
+        const newString = JSON.stringify(data);
+        return prevString !== newString ? data : prevHistory;
+      });
+    } catch (err) {
+      console.error('Failed to fetch lecture history:', err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (user) fetchHistory();
   }, [user]);
 
   useEffect(() => {
     const fetchTitles = async () => {
-      const urls = history.map(entry => {
+      const urls = history.map((entry) => {
         const data = Object.values(entry)[0] as LectureEntry;
         return data.video_url;
       });
 
-      const titlePromises = urls.map(async url => {
+      const titlePromises = urls.map(async (url) => {
         try {
-          const res = await fetch(`https://www.youtube.com/oembed?url=${url}&format=json`);
+          const res = await fetch(
+            `https://www.youtube.com/oembed?url=${url}&format=json`
+          );
           const json = await res.json();
           return { url, title: json.title };
         } catch {
@@ -89,9 +100,22 @@ export default function ProfilePage() {
     if (history.length > 0) fetchTitles();
   }, [history]);
 
+  // 👇 Poll every 10 seconds if user is logged in
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (user) {
+      intervalId = setInterval(() => {
+        fetchHistory();
+      }, 10000);
+    }
+    return () => clearInterval(intervalId);
+  }, [user]);
+
   const getThumbnail = (url: string) => {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-    return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : '';
+    return match
+      ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
+      : '';
   };
 
   const handleLogin = async () => {
@@ -107,16 +131,22 @@ export default function ProfilePage() {
   };
 
   const deleteVideo = async (videoUrl: string) => {
-    const auth = getAuth();
     const uid = auth.currentUser?.uid;
-    if (!uid) return alert("Not authenticated");
+    if (!uid) return alert('Not authenticated');
 
     const encoder = new TextEncoder();
-    const hash = await crypto.subtle.digest('SHA-256', encoder.encode(videoUrl));
-    const docId = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const hash = await crypto.subtle.digest(
+      'SHA-256',
+      encoder.encode(videoUrl)
+    );
+    const docId = Array.from(new Uint8Array(hash))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
 
     await deleteDoc(doc(firestore, 'users', uid, 'history', docId));
-    setHistory(prev => prev.filter(entry => Object.keys(entry)[0] !== docId));
+    setHistory((prev) =>
+      prev.filter((entry) => Object.keys(entry)[0] !== docId)
+    );
   };
 
   if (showModal && !user) {
@@ -157,42 +187,52 @@ export default function ProfilePage() {
             <div className="w-10 h-10 flex items-center justify-center bg-gray-300 dark:bg-gray-600 text-white rounded-full font-semibold text-sm uppercase">
               {user.name?.split(' ').join('').slice(0, 2)}
             </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              {user.name}
+            </span>
           </div>
         )}
 
         <nav className="mt-6">
-          <Link href="/upload" className="flex items-center px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+          <Link
+            href="/upload"
+            className="flex items-center px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+          >
             <UploadCloud className="mr-3" />
             Upload New Video
           </Link>
-          {/* <Link href="#" className="flex items-center px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            <Settings className="mr-3" />
-            Settings
-          </Link> */}
         </nav>
       </aside>
 
       {/* Main content */}
       <main className="flex-1 overflow-auto p-8 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Saved Videos</h1>
-          <p className="text-gray-600 dark:text-gray-400">Browse through your saved lecture notes</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            My Saved Videos
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Browse through your saved lecture notes
+          </p>
         </header>
 
         <div className="space-y-6">
           {loading ? (
             <p className="text-gray-500 dark:text-gray-400">Loading...</p>
           ) : history.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">No Videos saved yet.</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              No Videos saved yet.
+            </p>
           ) : (
             history.map((entry) => {
               const [docId, rawData] = Object.entries(entry)[0];
               const data = rawData as LectureEntry;
-              const displayDate = new Date(data.timestamp).toLocaleString();
-              const detailHref = `/profile/details?video_url=${encodeURIComponent(data.video_url)}`;
+              const displayDate = new Date(
+                data.timestamp
+              ).toLocaleString();
+              const detailHref = `/profile/details?video_url=${encodeURIComponent(
+                data.video_url
+              )}`;
               const thumbnail = getThumbnail(data.video_url);
-
               const isComplete = data.transcript && data.summary;
 
               return (
@@ -202,7 +242,11 @@ export default function ProfilePage() {
                 >
                   <div className="flex flex-row gap-4 items-start">
                     {thumbnail && (
-                      <img src={thumbnail} alt="Video thumbnail" className="w-40 h-24 object-cover rounded" />
+                      <img
+                        src={thumbnail}
+                        alt="Video thumbnail"
+                        className="w-40 h-24 object-cover rounded"
+                      />
                     )}
                     <div className="flex flex-col">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white break-words max-w-lg">
@@ -216,7 +260,9 @@ export default function ProfilePage() {
                       >
                         {data.video_url}
                       </Link>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{displayDate}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {displayDate}
+                      </p>
                     </div>
                   </div>
 
@@ -254,5 +300,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-const auth = getAuth();
