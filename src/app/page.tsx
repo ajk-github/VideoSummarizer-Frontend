@@ -37,10 +37,10 @@ export default function Home() {
       {/* Hero content */}
       <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:py-32 text-center">
         <h1 className="text-5xl font-semibold tracking-tight sm:text-7xl">
-          Turn Your Videos Into Smart Notes
+          Turn Your Videos Into Smart Summaries
         </h1>
         <p className="mt-8 text-lg font-medium text-gray-500 dark:text-gray-300 sm:text-xl">
-          Transform your classroom experience with our AI-powered note-taking app. Never miss important details again.
+          Transform your video learning experience with our AI-powered summarization and note-taking. Never miss important details again.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           
